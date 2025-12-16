@@ -110,118 +110,70 @@ app.get("/api/portfolio", async (req, res) => {
    BLOG ROUTES
 ------------------------------------------------------ */
 app.get("/api/blogs", async (req, res) => {
-  const blogs = await Blog.find().sort({ _id: -1 });
-  res.json(blogs);
+  res.json(await Blog.find().sort({ _id: -1 }));
 });
 
 app.post("/api/blogs", uploadBlogImage.single("image"), async (req, res) => {
-  try {
-    const { title, content } = req.body;
-    const image = req.file?.path || null;
+  const { title, content } = req.body;
 
-    const newBlog = new Blog({
-      title,
-      content,
-      image,
-      date: new Date().toDateString(),
-    });
+  const blog = await Blog.create({
+    title,
+    content,
+    image: req.file?.path || null,
+    date: new Date().toDateString(),
+  });
 
-    await newBlog.save();
-    res.status(201).json(newBlog);
-  } catch (err) {
-    res.status(500).json({ message: "Error creating blog", error: err.message });
-  }
+  res.status(201).json(blog);
 });
 
 app.put("/api/blogs/:id", uploadBlogImage.single("image"), async (req, res) => {
-  try {
-    const { title, content } = req.body;
-    const updateData = { title, content };
-
-    if (req.file?.path) updateData.image = req.file.path;
-
-    const updatedBlog = await Blog.findByIdAndUpdate(req.params.id, updateData, {
-      new: true,
-    });
-
-    if (!updatedBlog) return res.status(404).json({ message: "Blog not found" });
-
-    res.json(updatedBlog);
-  } catch (err) {
-    res.status(500).json({ message: "Error updating blog", error: err.message });
-  }
+  const updated = await Blog.findByIdAndUpdate(
+    req.params.id,
+    {
+      ...req.body,
+      ...(req.file?.path && { image: req.file.path }),
+    },
+    { new: true }
+  );
+  res.json(updated);
 });
 
 app.delete("/api/blogs/:id", async (req, res) => {
-  try {
-    const deleted = await Blog.findByIdAndDelete(req.params.id);
-    if (!deleted) return res.status(404).json({ message: "Blog not found" });
-
-    res.json({ message: "Blog deleted successfully", deleted });
-  } catch (err) {
-    res.status(500).json({ message: "Error deleting blog", error: err.message });
-  }
+  await Blog.findByIdAndDelete(req.params.id);
+  res.json({ message: "Blog deleted" });
 });
 
 /* ------------------------------------------------------
    PROJECT ROUTES
 ------------------------------------------------------ */
 app.get("/api/projects", async (req, res) => {
-  const projects = await Project.find().sort({ _id: -1 });
-  res.json(projects);
+  res.json(await Project.find().sort({ _id: -1 }));
 });
 
 app.post("/api/projects", uploadProjectImage.single("image"), async (req, res) => {
-  try {
-    const { name, description, link } = req.body;
-    const image = req.file?.path || null;
+  const project = await Project.create({
+    ...req.body,
+    image: req.file?.path || null,
+  });
 
-    const newProject = new Project({
-      name,
-      description,
-      link,
-      image,
-    });
-
-    await newProject.save();
-    res.status(201).json(newProject);
-  } catch (err) {
-    res.status(500).json({ message: "Error creating project", error: err.message });
-  }
+  res.status(201).json(project);
 });
 
 app.put("/api/projects/:id", uploadProjectImage.single("image"), async (req, res) => {
-  try {
-    const { name, description, link } = req.body;
-    const updateData = { name, description, link };
-
-    if (req.file?.path) updateData.image = req.file.path;
-
-    const updatedProject = await Project.findByIdAndUpdate(
-      req.params.id,
-      updateData,
-      { new: true }
-    );
-
-    if (!updatedProject)
-      return res.status(404).json({ message: "Project not found" });
-
-    res.json(updatedProject);
-  } catch (err) {
-    res.status(500).json({ message: "Error updating project", error: err.message });
-  }
+  const updated = await Project.findByIdAndUpdate(
+    req.params.id,
+    {
+      ...req.body,
+      ...(req.file?.path && { image: req.file.path }),
+    },
+    { new: true }
+  );
+res.json(updated);
 });
 
 app.delete("/api/projects/:id", async (req, res) => {
-  try {
-    const deleted = await Project.findByIdAndDelete(req.params.id);
-    if (!deleted)
-      return res.status(404).json({ message: "Project not found" });
-
-    res.json({ message: "Project deleted successfully", deleted });
-  } catch (err) {
-    res.status(500).json({ message: "Error deleting project", error: err.message });
-  }
+  await Project.findByIdAndDelete(req.params.id);
+  res.json({ message: "Project deleted" });
 });
 
 /* ------------------------------------------------------
