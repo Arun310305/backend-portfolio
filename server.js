@@ -2,6 +2,7 @@ import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
 import multer from "multer";
+import nodemailer from "nodemailer";
 import dotenv from "dotenv";
 import { v2 as cloudinary } from "cloudinary";
 import { CloudinaryStorage } from "multer-storage-cloudinary";
@@ -221,6 +222,39 @@ app.delete("/api/projects/:id", async (req, res) => {
     res.json({ message: "Project deleted successfully", deleted });
   } catch (err) {
     res.status(500).json({ message: "Error deleting project", error: err.message });
+  }
+});
+
+/* ------------------------------------------------------
+   CONTACT FORM (EMAIL)
+------------------------------------------------------ */
+app.post("/api/contact", async (req, res) => {
+  try {
+    const { name, email, message } = req.body;
+
+    if (!name || !email || !message)
+      return res.status(400).json({ message: "All fields required" });
+
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: { user: process.env.MAIL_USER, pass: process.env.MAIL_PASS },
+    });
+
+    await transporter.sendMail({
+      from: "Portfolio Contact <noreply@gmail.com>",
+      to: process.env.MAIL_USER,
+      subject: "New Portfolio Contact",
+      html: `
+        <h3>New Message from Portfolio</h3>
+        <p><b>Name:</b> ${name}</p>
+        <p><b>Email:</b> ${email}</p>
+        <p>${message}</p>
+      `,
+    });
+
+    res.json({ success: true, message: "Message sent!" });
+  } catch (err) {
+    res.status(500).json({ message: "Email error", error: err.message });
   }
 });
 
