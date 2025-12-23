@@ -6,6 +6,10 @@ import nodemailer from "nodemailer";
 import dotenv from "dotenv";
 import { v2 as cloudinary } from "cloudinary";
 import { CloudinaryStorage } from "multer-storage-cloudinary";
+import authRoutes from "./routes/auth.js";
+import User from "../models/User.js";
+
+
 
 dotenv.config();
 
@@ -46,6 +50,9 @@ const uploadProjectImage = multer({ storage: projectStorage });
 const app = express();
 app.use(cors());
 app.use(express.json());
+
+app.use("/api/auth", authRoutes);
+
 
 /* ------------------------------------------------------
    MONGODB CONNECTION (SAFE)
