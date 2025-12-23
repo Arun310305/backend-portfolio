@@ -205,6 +205,9 @@ app.post("/api/projects", uploadProjectImage.single("image"), async (req, res) =
 /* ------------------------------------------------------
    CONTACT FORM
 ------------------------------------------------------ */
+  app.get("/api/test", (req, res) => {
+  res.json({ ok: true });
+});
 
 /* ------------------------------------------------------
    EXPORT FOR VERCEL
