@@ -235,35 +235,51 @@ app.post("/api/projects", uploadProjectImage.single("image"), async (req, res) =
 /* ------------------------------------------------------
    CONTACT FORM
 ------------------------------------------------------ */
-  app.post("/api/contact", async (req, res) => {
+ app.post("/api/contact", async (req, res) => {
   try {
     const { name, email, message } = req.body;
 
-    if (!name || !email || !message)
-      return res.status(400).json({ message: "All fields required" });
+    if (!name || !email || !message) {
+      return res
+        .status(400)
+        .json({ success: false, message: "All fields required" });
+    }
 
     const transporter = nodemailer.createTransport({
       service: "gmail",
-      auth: { user: process.env.MAIL_USER, pass: process.env.MAIL_PASS },
+      auth: {
+        user: process.env.MAIL_USER,
+        pass: process.env.MAIL_PASS,
+      },
     });
 
     await transporter.sendMail({
-      from: "Portfolio Contact <noreply@gmail.com>",
+      from: `"Portfolio Contact" <${process.env.MAIL_USER}>`,
       to: process.env.MAIL_USER,
+      replyTo: email,
       subject: "New Portfolio Contact",
       html: `
         <h3>New Message from Portfolio</h3>
         <p><b>Name:</b> ${name}</p>
         <p><b>Email:</b> ${email}</p>
+        <p><b>Message:</b></p>
         <p>${message}</p>
       `,
     });
 
-    res.json({ success: true, message: "Message sent!" });
+    res.status(200).json({
+      success: true,
+      message: "Message sent successfully!",
+    });
   } catch (err) {
-    res.status(500).json({ message: "Email error", error: err.message });
+    console.error("Contact error:", err);
+    res.status(500).json({
+      success: false,
+      message: "Email sending failed",
+    });
   }
 });
+
 
 /* ------------------------------------------------------
    EXPORT FOR VERCEL
