@@ -169,6 +169,21 @@ app.post("/api/blogs", uploadBlogImage.single("image"), async (req, res) => {
     res.status(500).json({ message: "Failed to create blog" });
   }
 });
+  app.delete("/api/blogs/:id", async (req, res) => {
+  try {
+    const deletedBlog = await Blog.findByIdAndDelete(req.params.id);
+
+    if (!deletedBlog) {
+      return res.status(404).json({ message: "Blog not found" });
+    }
+
+    res.status(200).json({ message: "Blog deleted successfully" });
+  } catch (error) {
+    console.error("Delete blog error:", error);
+    res.status(500).json({ message: "Failed to delete blog" });
+  }
+});
+
 
 /* ------------------------------------------------------
    PROJECT ROUTES
@@ -201,6 +216,21 @@ app.post("/api/projects", uploadProjectImage.single("image"), async (req, res) =
     res.status(500).json({ message: "Failed to create project" });
   }
 });
+ app.delete("/api/projects/:id", async (req, res) => {
+  try {
+    const deletedProject = await Project.findByIdAndDelete(req.params.id);
+
+    if (!deletedProject) {
+      return res.status(404).json({ message: "Project not found" });
+    }
+
+    res.status(200).json({ message: "Project deleted successfully" });
+  } catch (error) {
+    console.error("Delete project error:", error);
+    res.status(500).json({ message: "Failed to delete project" });
+  }
+});
+
 
 /* ------------------------------------------------------
    CONTACT FORM
